@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 # import requests
 from . import db
-# from .models import Jobs
-# from .models import Users
+from .models import JobListings
+from .models import SiteUsers
 import pdb
 
 api = Blueprint('api', __name__)
@@ -12,25 +12,47 @@ api = Blueprint('api', __name__)
 # add user to db
 @api.route("/add_user", methods=['POST'])
 def add_user():
-    # user_data = request.get_json()
-    # new_user = Users(name=user_data['name'])
+    user_data = request.get_json()
+    new_user = SiteUsers(name=user_data['name'])
 
-    # db.session.add(new_user)
-    # db.session.commit()
+    db.session.add(new_user)
+    db.session.commit()
 
     return 'User Successfully Added', 201
 
 
 @api.route("/users")
 def users():
-    # user_list = User.query.all()
-
+    # query db table
+    user_list = SiteUsers.query.all()
     users = []
+ 
+    for user in user_list:
+        users.append({'name': user.name})
+
+    return jsonify({'users': users})
+
+# @api.route("/add_job_listing", methods=['POST'])
+# def add_job_listing():
+#     job_listing_data = request.get_json()
+#     new_job_listing = SiteUsers(name=user_data['name'])
+
+#     # db.session.add(new_user)
+#     # db.session.commit()
+
+#     return 'User Successfully Added', 201
+
+
+# @api.route("/job_listings")
+# def job_listings():
+#     # user_list = User.query.all()
+
+#     job_listings = []
 
     # for user in user_list:
     #     users.append({'name': users.name})
 
-    return jsonify({'users': users})
+    # return jsonify({'job_listings': job_listings})
 
 
 # @api.route('/job_listings')
