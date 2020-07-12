@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 # import requests
 from . import db
-from .models import JobListings
-from .models import SiteUsers
+from .models import job_listings
+from .models import site_users
 import pdb
 
 api = Blueprint('api', __name__)
@@ -26,21 +26,23 @@ def users():
     # query db table
     user_list = SiteUsers.query.all()
     users = []
- 
+
     for user in user_list:
         users.append({'name': user.name})
 
     return jsonify({'users': users})
 
-# @api.route("/add_job_listing", methods=['POST'])
-# def add_job_listing():
-#     job_listing_data = request.get_json()
-#     new_job_listing = SiteUsers(name=user_data['name'])
 
-#     # db.session.add(new_user)
-#     # db.session.commit()
+@api.route("/add_job_listing", methods=['POST'])
+def add_job_listing():
+    job_listing_data = request.get_json()
+    new_job_listing = job_listings(external_id=job_listing_data['external_id'], name=job_listing_data['name'], created_at=job_listing_data['created_at'], company=job_listing_data['company'],
+                                company_url=job_listing_data['company_url'], location=job_listing_data['location'], title=job_listing_data['title'], description=job_listing_data['description'])
 
-#     return 'User Successfully Added', 201
+    db.session.add(new_job_listing)
+    db.session.commit()
+
+    return 'User Successfully Added', 201
 
 
 # @api.route("/job_listings")

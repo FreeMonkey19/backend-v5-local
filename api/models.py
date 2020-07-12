@@ -1,11 +1,11 @@
 from . import db
 
-class SiteUsers(db.Model):
+class site_users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
    
 
-class JobListings(db.Model):
+class job_listings(db.Model):
     id = db.Column(db.Integer, nullable=False)
     external_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
