@@ -1,19 +1,19 @@
 from flask import Blueprint, jsonify, request
-# import requests
+import requests
 from . import db
 from .models import job_listings
 from .models import site_users
 import pdb
 
 api = Blueprint('api', __name__)
-# BASE_URL = 'https://jobs.github.com/positions.json?'
+BASE_URL = 'https://jobs.github.com/positions.json?'
 
 
 # add user to db
 @api.route("/add_user", methods=['POST'])
 def add_user():
     user_data = request.get_json()
-    new_user = SiteUsers(name=user_data['name'])
+    new_user = site_users(name=user_data['name'])
 
     db.session.add(new_user)
     db.session.commit()
@@ -24,7 +24,7 @@ def add_user():
 @api.route("/users")
 def users():
     # query db table
-    user_list = SiteUsers.query.all()
+    user_list = site_users.query.all()
     users = []
 
     for user in user_list:
@@ -37,7 +37,7 @@ def users():
 def add_job_listing():
     job_listing_data = request.get_json()
     new_job_listing = job_listings(external_id=job_listing_data['external_id'], name=job_listing_data['name'], created_at=job_listing_data['created_at'], company=job_listing_data['company'],
-                                company_url=job_listing_data['company_url'], location=job_listing_data['location'], title=job_listing_data['title'], description=job_listing_data['description'])
+                                   company_url=job_listing_data['company_url'], location=job_listing_data['location'], title=job_listing_data['title'], description=job_listing_data['description'])
 
     db.session.add(new_job_listing)
     db.session.commit()
@@ -45,27 +45,19 @@ def add_job_listing():
     return 'User Successfully Added', 201
 
 
-# @api.route("/job_listings")
-# def job_listings():
-#     # user_list = User.query.all()
+@api.route('/job_listings')
+def joblistings():
+    description = request.args.get('description')
+    location = request.args.get('location')
+    response = requests.get(
+        BASE_URL, params={'location': location, 'description': description})
 
-#     job_listings = []
+    job_list = response.json()
 
-    # for user in user_list:
-    #     users.append({'name': users.name})
+    jobs = []
+    for listing in job_list:
+        jobs.append({'company': listing['company'], 'title': listing['title'],
+                     'location': listing['location']})
 
-    # return jsonify({'job_listings': job_listings})
-
-
-# @api.route('/job_listings')
-# def joblistings():
-#     response = requests.get(BASE_URL)
-#     job_list = response.json()
-#     # check if request has any request.args
-#     # if yes, print args
-#     jobs = []
-#     for listing in job_list:
-#         # if there is location arg then only add listing that matches that location
-#         jobs.append({'title' : listing['title'], 'location' : listing['location']})
-
-#     return jsonify({'jobs' : jobs})
+    return jsonify({'jobs': jobs})
+ 
