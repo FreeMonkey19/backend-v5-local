@@ -16,6 +16,13 @@ def create_app():
 # instantiate app
     db.init_app(app)
 
+    # blueprint for auth routes in app
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint)
+    # blueprint for non-auth parts of app
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+    
     from .views import api
     app.register_blueprint(api)
 
