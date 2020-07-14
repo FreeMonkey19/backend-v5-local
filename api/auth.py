@@ -1,7 +1,7 @@
 from flask import Blueprint
 from . import db
 
-auth = Blueprint('auth', __name__)
+auth= Blueprint('auth', __name__)
 
 # add user to db
 # @auth.route("/registrations", methods=['POST'])
