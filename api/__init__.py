@@ -24,7 +24,7 @@ def create_app():
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
 
-    from .views import api_v1
-    app.register_blueprint(api_v1)
+    from .views import api
+    app.register_blueprint(api)
 
     return app
