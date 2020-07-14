@@ -1,9 +1,13 @@
 from . import db
 
+
 class site_users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
-   
+    email = db.Column(db.String(100))
+    password = db.Column(db.String(50))
+    password_confirmation = db.Column(db.String(50))
+
 
 class job_listings(db.Model):
     id = db.Column(db.Integer, nullable=False)
