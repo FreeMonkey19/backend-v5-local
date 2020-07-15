@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 import requests
+from flask import Response
 from . import db
 from flask_cors import CORS, cross_origin
 from .models import job_listings
@@ -14,11 +15,20 @@ CORS(api)
 BASE_URL = 'https://jobs.github.com/positions.json?'
 
 
-# create new user via registration and add to db
+# new user
 @api.route("/api/users/registrations", methods=['POST'])
 @cross_origin()
 def add_user():
     new_user_data = request.get_json()
+
+# if this returns a user, email already taken
+    user = user_data.query.filter_by(
+        email=new_user_data['user']['email']).first()
+
+    if user:
+
+        return Response("{'error': 'user already exists'}",  status=400, mimetype='application/json')
+
     new_user = user_data(name=new_user_data['user']['name'], email=new_user_data['user']['email'],
                          password=new_user_data['user']['password'], password_confirmation=new_user_data['user']['password_confirmation'])
 
@@ -28,11 +38,25 @@ def add_user():
     return 'User Successfully Registered', 201
 
 
-# once a user is registered they can login
-@api.route("/api/users", methods=['GET', 'POST'])
+# returning user
+@api.route("/api/users/login", methods=['POST'])
 def login():
-    print("logged in")
-    return 'Logged In!'
+    email = request.get_json('email')
+    password = request.get_json('password')
+    # remember = True if request.get_json('remember') else False
+
+    user = user_data.query.filter_by(email=email).first
+
+    # check if user exists
+    # take user password, hash it and compare it to hashed password in db
+
+    if not user:
+
+        return Response("{'error': 'error'}",  status=400, mimetype='application/json')
+
+        login(user, email=user['user']['email'])
+
+    return Response("{'status': 'ok'}",  status=200, mimetype='application/json')
 
 
 @api.route("/api/users")
@@ -80,3 +104,11 @@ def joblistings():
                      'company_url': listing['company_url'], 'location': listing['location'], 'description': listing['description'], 'how_to_apply': listing['how_to_apply'], 'company_logo': listing['company_logo']})
 
     return jsonify({'jobs': jobs})
+
+    api.route('/api/logout')
+
+    @login_required
+    def logout():
+        logout_user()
+
+        return Response("{'status': 'successfully logged out'}",  status=200, mimetype='application/json')
