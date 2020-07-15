@@ -8,12 +8,13 @@ import pdb
 
 api = Blueprint('api', __name__)
 
+
 CORS(api)
 
 BASE_URL = 'https://jobs.github.com/positions.json?'
 
 
-# add user to db
+# create new user via registration and add to db
 @api.route("/api/users/registrations", methods=['POST'])
 @cross_origin()
 def add_user():
@@ -24,7 +25,14 @@ def add_user():
     db.session.add(new_user)
     db.session.commit()
 
-    return 'User Successfully Added', 201
+    return 'User Successfully Registered', 201
+
+
+# once a user is registered they can login
+@api.route("/api/logged_in", methods=['POST'])
+def login():
+    print("logged in")
+    return 'Logged In!'
 
 
 @api.route("/api/users")
@@ -41,6 +49,7 @@ def users():
     return jsonify({'users': users})
 
 
+# add job listing to db
 @ api.route("/api/add_job_listing", methods=['POST'])
 @ cross_origin()
 def add_job_listing():
@@ -54,6 +63,7 @@ def add_job_listing():
     return 'Job Successfully Added', 201
 
 
+# get all job listings from api
 @ api.route('/api/job_listings')
 @ cross_origin()
 def joblistings():
