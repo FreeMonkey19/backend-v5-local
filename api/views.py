@@ -3,7 +3,7 @@ import requests
 from . import db
 from flask_cors import CORS, cross_origin
 from .models import job_listings
-from .models import site_users
+from .models import user_data
 import pdb
 
 api = Blueprint('api', __name__)
@@ -17,17 +17,9 @@ BASE_URL = 'https://jobs.github.com/positions.json?'
 @api.route("/api/users/registrations", methods=['POST'])
 @cross_origin()
 def add_user():
-    user_data = request.get_json()
-    new_user = site_users(name=user_data['user']['name'])
-    print('hello')
-    print(new_user)
-
-    # for value in user_data.values():
-    #     print(value)
-    #     if value['name'] in user_data:
-    #         user_data[value['name']].update(value)
-    #     else:
-    #         user_data[value['name']] = value
+    new_user_data = request.get_json()
+    new_user = user_data(name=new_user_data['user']['name'], email=new_user_data['user']['email'],
+                         password=new_user_data['user']['password'], password_confirmation=new_user_data['user']['password_confirmation'])
 
     db.session.add(new_user)
     db.session.commit()
@@ -39,20 +31,21 @@ def add_user():
 @cross_origin()
 def users():
     # query db table
-    user_list = site_users.query.all()
+    user_list = user_data.query.all()
     users = []
 
     for user in user_list:
-        users.append({'name': user.name})
+        users.append({'name': user.name, 'email': user.email, 'password': user.password,
+                      'password_confirmation': user.password_confirmation})
 
     return jsonify({'users': users})
 
 
-@api.route("/api/add_job_listing", methods=['POST'])
-@cross_origin()
+@ api.route("/api/add_job_listing", methods=['POST'])
+@ cross_origin()
 def add_job_listing():
     job_listing_data = request.get_json()
-    new_job_listing = job_listings(external_id=job_listing_data['external_id'], title=job_listing_data['title'], created_at=job_listing_data['created_at'], company=job_listing_data['company'],
+    new_job_listing = job_listings(id=job_listing_data['external_id'], title=job_listing_data['title'], created_at=job_listing_data['created_at'], company=job_listing_data['company'],
                                    company_url=job_listing_data['company_url'], location=job_listing_data['location'], description=job_listing_data['description'])
 
     db.session.add(new_job_listing)
@@ -61,8 +54,8 @@ def add_job_listing():
     return 'Job Successfully Added', 201
 
 
-@api.route('/api/job_listings')
-@cross_origin()
+@ api.route('/api/job_listings')
+@ cross_origin()
 def joblistings():
     description = request.args.get('description')
     location = request.args.get('location')
@@ -73,7 +66,7 @@ def joblistings():
 
     jobs = []
     for listing in job_list:
-        jobs.append({ 'id': listing['id'], 'company': listing['company'], 'title': listing['title'], 'created_at': listing['created_at'],
+        jobs.append({'id': listing['id'], 'company': listing['company'], 'title': listing['title'], 'created_at': listing['created_at'],
                      'company_url': listing['company_url'], 'location': listing['location'], 'description': listing['description'], 'how_to_apply': listing['how_to_apply'], 'company_logo': listing['company_logo']})
 
     return jsonify({'jobs': jobs})
