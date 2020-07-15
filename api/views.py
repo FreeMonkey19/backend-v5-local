@@ -29,7 +29,7 @@ def add_user():
 
 
 # once a user is registered they can login
-@api.route("/api/logged_in", methods=['POST'])
+@api.route("/api/users", methods=['GET', 'POST'])
 def login():
     print("logged in")
     return 'Logged In!'
