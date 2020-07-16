@@ -12,7 +12,8 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    cors = CORS(app)
+    cors = CORS(app, supports_credentials=True)
+
     migrate = Migrate(app, db)
     app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -30,14 +31,6 @@ def create_app():
     def load_user(user_id):
         # since the user_id is just the primary key of our user table, use it in the query for the user
         return user_data.query.get(int(user_data.id))
-
-    # blueprint for auth routes in app
-    # from .auth import auth as auth_blueprint
-    # app.register_blueprint(auth_blueprint)
-
-    # blueprint for non-auth parts of app
-    # from .main import main as main_blueprint
-    # app.register_blueprint(main_blueprint)
 
     from .views import api
     app.register_blueprint(api)

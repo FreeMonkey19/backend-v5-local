@@ -3,6 +3,9 @@ import requests
 from flask import Response
 from . import db
 from flask_cors import CORS, cross_origin
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, logout_user, login_required
+
 from .models import job_listings
 from .models import user_data
 import pdb
@@ -10,27 +13,32 @@ import pdb
 api = Blueprint('api', __name__)
 
 
-CORS(api)
+cors = CORS(api, resources={r"/api/*": {"origins": "*"}})
+
 
 BASE_URL = 'https://jobs.github.com/positions.json?'
 
 
 # new user
 @api.route("/api/users/registrations", methods=['POST'])
-@cross_origin()
 def add_user():
     new_user_data = request.get_json()
+    print("this is user data")
+    print(new_user_data)
+    # {'user': {'email': 'qqqqq@q.com', 'password': '1', 'password_confirmation': '1'}}
 
-# if this returns a user, email already taken
+    #   if this returns a user, email already taken
     user = user_data.query.filter_by(
         email=new_user_data['user']['email']).first()
+    # print("this is user")
+    # print(user)
 
     if user:
-
         return Response("{'error': 'user already exists'}",  status=400, mimetype='application/json')
 
+    # create a new user with the form data. Hash the password so the plaintext version isn't saved.
     new_user = user_data(name=new_user_data['user']['name'], email=new_user_data['user']['email'],
-                         password=new_user_data['user']['password'], password_confirmation=new_user_data['user']['password_confirmation'])
+                         password=generate_password_hash(new_user_data['user']['password'], method='sha256'))
 
     db.session.add(new_user)
     db.session.commit()
@@ -39,28 +47,27 @@ def add_user():
 
 
 # returning user
-@api.route("/api/users/login", methods=['POST'])
+@ api.route("/api/users/login", methods=['POST'])
 def login():
     email = request.get_json('email')
     password = request.get_json('password')
     # remember = True if request.get_json('remember') else False
 
-    user = user_data.query.filter_by(email=email).first
+    user = user_data.query.filter_by(email=email).first()
 
     # check if user exists
     # take user password, hash it and compare it to hashed password in db
 
-    if not user:
+    if not user or not check_password_hash(user['password'], password):
 
         return Response("{'error': 'error'}",  status=400, mimetype='application/json')
 
-        login(user, email=user['user']['email'])
+    login_user(user, email=user['user']['email'], password=[password])
 
     return Response("{'status': 'ok'}",  status=200, mimetype='application/json')
 
 
-@api.route("/api/users")
-@cross_origin()
+@ api.route("/api/users")
 def users():
     # query db table
     user_list = user_data.query.all()
@@ -105,10 +112,10 @@ def joblistings():
 
     return jsonify({'jobs': jobs})
 
-    api.route('/api/logout')
 
-    @login_required
-    def logout():
-        logout_user()
+@ api.route('/api/logout')
+@ login_required
+def logout():
+    logout_user()
 
-        return Response("{'status': 'successfully logged out'}",  status=200, mimetype='application/json')
+    return Response("{'status': 'successfully logged out'}",  status=200, mimetype='application/json')
