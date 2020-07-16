@@ -49,6 +49,8 @@ def add_user():
 # returning user
 @ api.route("/api/users/login", methods=['POST'])
 def login():
+    print('********************************')
+    print(request)
     email = request.get_json('email')
     password = request.get_json('password')
     # remember = True if request.get_json('remember') else False
