@@ -76,8 +76,7 @@ def users():
     users = []
 
     for user in user_list:
-        users.append({'name': user.name, 'email': user.email, 'password': user.password,
-                      'password_confirmation': user.password_confirmation})
+        users.append({'name': user.name, 'email': user.email, 'password': user.password})
 
     return jsonify({'users': users})
 
