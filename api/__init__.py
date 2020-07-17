@@ -10,6 +10,9 @@ from flask import Response
 db = SQLAlchemy()
 
 
+
+
+
 def create_app():
     app = Flask(__name__)
     cors = CORS(app, supports_credentials=True)
