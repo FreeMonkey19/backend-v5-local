@@ -49,22 +49,36 @@ def add_user():
 # returning user
 @ api.route("/api/users/login", methods=['POST'])
 def login():
-    print('********************************')
     print(request)
-    email = request.get_json('email')
-    password = request.get_json('password')
+    params=request.get_json()
+    user_email = params["user"]["email"]
+    user_password = params['user']['password']
+    # email = request.get_json('email')
+    # password = request.get_json('password')
     # remember = True if request.get_json('remember') else False
+    print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
 
-    user = user_data.query.filter_by(email=email).first()
+    # print(email)
+    # print(password)
 
+    user = user_data.query.filter_by(email=user_email).first()
+    password = user.password
+    print(user)
     # check if user exists
     # take user password, hash it and compare it to hashed password in db
+    print("password hash")
+    print(check_password_hash(user_password, password))
+    print("user_password")
+    print(user_password)
+    print("password")
+    print(password)
 
-    if not user or not check_password_hash(user['password'], password):
+
+    if not user or not check_password_hash(password, user_password):
 
         return Response("{'error': 'error'}",  status=400, mimetype='application/json')
 
-    login_user(user, email=user['user']['email'], password=[password])
+    login_user(user)
 
     return Response("{'status': 'ok'}",  status=200, mimetype='application/json')
 
