@@ -74,7 +74,7 @@ def login():
     print(password)
 
 
-    if not user or not check_password_hash(password, user_password):
+    if not user or not check_password_hash(user_password, password):
 
         return Response("{'error': 'error'}",  status=400, mimetype='application/json')
 
